@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow,session } from 'electron';
 import path from 'path';
 import ua from 'universal-analytics';
 import uuid from 'uuid';
@@ -17,6 +17,9 @@ import I3IpcHelperClass from './main/utils/I3IpcHelper';
 import handleStartupEvent from './squirrel';
 
 import { updateShortcuts } from './main/utils/_shortcutManager';
+
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'node-fetch';
 
 app.setAppUserModelId('com.marshallofsound.gpmdp.core');
 
@@ -114,6 +117,11 @@ app.setAppUserModelId('com.marshallofsound.gpmdp.core');
     }
 
     mainWindow = new BrowserWindow(generateBrowserConfig());
+    // enable the adblocker :)
+    ElectronBlocker.fromPrebuiltAdsOnly(fetch).then((blocker) => {
+      blocker.enableBlockingInSession(session.defaultSession)
+    });
+
     const signInUserAgent = Settings.get('overrideSignInUserAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0');
 
     // Spoof the user agent, this allows for future work arounds
